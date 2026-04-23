@@ -1,0 +1,4 @@
+.vscode/
+*.DSYM/
+*.exe
+*.out
