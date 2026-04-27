@@ -2,3 +2,7 @@
 *.dSYM/
 *.exe
 *.out
+*.csv
+*.ilk
+*.obj
+*.pdb
