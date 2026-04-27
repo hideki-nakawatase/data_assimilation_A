@@ -10,6 +10,7 @@ ofstream ofs("quadratic_avg.csv");
 double dt = 0.01;
 int N = 40;
 double F = 8;
+int time_steps = 400;
 
 vector<double> lorenz96(const vector<double> &X)
 {
@@ -27,12 +28,13 @@ vector<double> lorenz96(const vector<double> &X)
 
 double avg(const vector<double> &X)
 {
-    double sum=0;
-    for (int i=0;i<N;i++){
-        
-        sum+=X[i];
+    double sum = 0;
+    for (int i = 0; i < N; i++)
+    {
+
+        sum += X[i];
     }
-    return sum/N;
+    return sum / N;
 }
 
 int main()
@@ -40,13 +42,13 @@ int main()
     ofs << fixed << setprecision(5);
     vector<double> X(N, F);
     vector<double> k1(N), k2(N), k3(N), k4(N), tmp(N);
-    vector<double> dX1(N), dX2(N), dX3(N), dX4(N),q(N);
+    vector<double> dX1(N), dX2(N), dX3(N), dX4(N), q(N);
 
     X[N / 2] += F * 0.01;
 
-    for (int step = 0; step < 40; step++)
+    for (int step = 0; step < time_steps; step++)
     {
-// X
+        // X
         dX1 = lorenz96(X);
         for (int i = 0; i < N; i++)
             k1[i] = dt * dX1[i];
@@ -75,12 +77,11 @@ int main()
         for (int i = 0; i < N; i++)
             X[i] += (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) / 6;
 
-        for  (int i=0;i<N;i++)
-            q[i]=(X[i])*(X[i]);
-            
-        ofs << log(avg(q))<<endl;
+        for (int i = 0; i < N; i++)
+            q[i] = (X[i]) * (X[i]);
+
+        ofs << log(avg(q)) << endl;
     }
-        
 
     return 0;
 }
