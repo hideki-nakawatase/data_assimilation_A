@@ -23,12 +23,12 @@ double sum(const vector<double> &X)
 
 int main()
 {
-  ofstream ofs("plob2_data/lyapunov.csv");
+  ofstream ofs("../plob2_data/lyapunov.csv");
 
   vector<double> d(N, 0), X(N, F), X_true(N, F);
   vector<double> k1(N), k2(N), k3(N), k4(N);
   vector<double> dX1(N), dX2(N), dX3(N), dX4(N), tmp(N);
-  vector<double> d_ls(0);
+  double d_sum = 0;
 
   X_true[N / 2] += 0.01;
 
@@ -45,27 +45,25 @@ int main()
     d0 += d[i] * d[i];
   d0 = sqrt(d0);
 
-  X = lorenz96_rk4(N, time_steps, dt, F, X);
-
-  X_true = lorenz96_rk4(N, time_steps, dt, F, X_true);
-
   // d
   for (int j = 0; j < time_steps; j++)
   {
     double d_length = 0;
+    X = lorenz96_rk4(N, 1, dt, F, X);
+
+    X_true = lorenz96_rk4(N, 1, dt, F, X_true);
     for (int i = 0; i < N; i++)
     {
       d[i] = X[i] - X_true[i];
       d_length += d[i] * d[i];
     }
     d_length = sqrt(d_length);
-    d_ls.resize(d_ls.size() + 1);
-    d_ls[j] = log(d_length / d0);
-    ofs << sum(d_ls) / dt / j << endl;
+    d_sum += log(d_length / d0);
+    ofs << d_sum / dt / j << endl;
 
     for (int i = 0; i < N; i++)
       X[i] = X_true[i] + d0 * (X[i] - X_true[i]) / d_length;
   }
-  cout << "λ = " << sum(d_ls) / dt / time_steps << endl;
+  cout << "λ = " << d_sum / dt / time_steps << endl;
   return 0;
 }
