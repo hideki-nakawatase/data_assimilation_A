@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("-A/diff_mse.csv",header=None)
+df = pd.read_csv("plob2_data\lyapunov.csv",header=None)
 
 fig = plt.figure(num=3, figsize=(10, 12))
 ax1 = fig.add_subplot(111)
@@ -18,5 +18,5 @@ fig.suptitle("Lorenz 96: mse progression")
 
 plt.xlabel("Time Step")
 
-plt.savefig("quadratic_avg.jpg")
+plt.savefig("test.jpg")
 plt.show()
