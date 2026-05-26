@@ -1,4 +1,4 @@
 #pragma once
-#include <vector>
+#include <Eigen/Dense>
 
-std::vector<std::vector<double>> lorenz96_jacobi_matrix(std::vector<double> &x);
+Eigen::MatrixXd lorenz96_jacobi_matrix(Eigen::VectorXd &x);

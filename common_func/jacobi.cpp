@@ -1,30 +1,26 @@
 #include "jacobi.h"
 #include "lorenz96_rk4.h"
-#include <vector>
 #include <cmath>
+#include <Eigen/Dense>
 
 using namespace std;
 
-vector<vector<double>> lorenz96_jacobi_matrix(vector<double> &x)
+Eigen::MatrixXd lorenz96_jacobi_matrix(Eigen::VectorXd &x)
 {
   int N = 40;
-  vector<vector<double>> jacobi_matrix(N, vector<double>(N, 0.0));
+  Eigen::MatrixXd jacobi_matrix(N, N);
+  jacobi_matrix.setZero();
 
-  double epsilon = 1e-7;
-
-  vector<double> x_base = lorenz96_rk4(N, 1, 0.005, 8, x);
-
-  for (int j = 0; j < N; j++)
+  for (int i = 0; i < N; i++)
   {
-    vector<double> x_dif = x;
-    x_dif[j] += epsilon;
+    int k = (i - 1 + N) % N;
+    int l = (i - 2 + N) % N;
+    int m = (i + 1) % N;
 
-    vector<double> x_dif_next = lorenz96_rk4(N, 1, 0.005, 8, x_dif);
-
-    for (int i = 0; i < N; i++)
-    {
-      jacobi_matrix[i][j] = (x_dif_next[i] - x_base[i]) / epsilon;
-    }
+    jacobi_matrix(i, i) = -1.0;
+    jacobi_matrix(i, k) = x[m] - x[l];
+    jacobi_matrix(i, l) = -x[k];
+    jacobi_matrix(i, m) = x[k];
   }
 
   return jacobi_matrix;

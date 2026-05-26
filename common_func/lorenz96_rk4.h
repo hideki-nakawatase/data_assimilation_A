@@ -1,4 +1,4 @@
 #pragma once
-#include <vector>
+#include <Eigen/Dense>
 
-std::vector<double> lorenz96_rk4(int N, int steps, double dt, double F, std::vector<double> &X);
+Eigen::VectorXd lorenz96_rk4(int N, int steps, double dt, double F, Eigen::VectorXd &X);

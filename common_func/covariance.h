@@ -1,4 +1,4 @@
 #pragma once
-#include <vector>
+#include <Eigen/Dense>
 
-std::vector<std::vector<double>> covariance_matrix(std::vector<double> &x);
+Eigen::MatrixXd covariance_matrix(Eigen::MatrixXd &p, Eigen::VectorXd &x);

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <Eigen/Dense>
 #include "lorenz96_rk4.h"
 
 using namespace std;

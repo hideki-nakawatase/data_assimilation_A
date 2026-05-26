@@ -1,12 +1,13 @@
 #include "lorenz96_rk4.h"
 #include "lorenz96.h"
+#include <Eigen/Dense>
 
 using namespace std;
 
-vector<double> lorenz96_rk4(int N, int steps, double dt, double F, vector<double> &X)
+Eigen::VectorXd lorenz96_rk4(int N, int steps, double dt, double F, Eigen::VectorXd &X)
 {
-  vector<double> k1(N), k2(N), k3(N), k4(N);
-  vector<double> dX1(N), dX2(N), dX3(N), dX4(N), tmp(N);
+  Eigen::VectorXd k1(N), k2(N), k3(N), k4(N);
+  Eigen::VectorXd dX1(N), dX2(N), dX3(N), dX4(N), tmp(N);
   for (int j = 0; j < steps; j++)
   {
     dX1 = lorenz96(X, N, F);

@@ -1,4 +1,4 @@
 #pragma once
-#include <vector>
+#include <Eigen/Dense>
 
-std::vector<double> lorenz96(std::vector<double> &X, int N, double F);
+Eigen::VectorXd lorenz96(Eigen::VectorXd &X, int N, double F);

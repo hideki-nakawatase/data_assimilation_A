@@ -1,6 +1,6 @@
 #include "lorenz96_rk4.h"
 #include "random.h"
-#include <vector>
+#include <Eigen/Dense>
 #include <fstream>
 
 using namespace std;
@@ -13,9 +13,13 @@ double F = 8;
 
 int main()
 {
-  vector<double> x(N, F), x_obs(N);
+  Eigen::VectorXd x(N), x_obs(N);
   ofstream file_true("../true_data/true_data.csv");
   ofstream file_obs("../observation_data/observation_data.csv");
+  for (int i = 0; i < N; i++)
+  {
+    x[i] = F;
+  }
   x[N / 2] += 0.0001;
   x = lorenz96_rk4(N, time_steps / 2, dt, F, x);
 
