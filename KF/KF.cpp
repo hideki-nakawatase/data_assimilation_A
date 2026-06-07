@@ -4,26 +4,21 @@
 #include "read_csv.h"
 #include "lorenz96_rk4.h"
 #include "covariance.h"
+#include "constant.h"
 
 using namespace std;
 
-int days = 730;
-double dt = 0.005;
-// double dt = 0.05;
-int time_steps = 0.2 / dt * days;
-int N = 40;
-double F = 8;
-
 int main()
 {
-    ofstream file("../KF_data/no_KF_data.csv");
+    ofstream file("KF_data/KF_data_delta.csv");
+    Eigen::MatrixXd file_output(time_steps / 10, N);
     Eigen::MatrixXd p = Eigen::MatrixXd::Identity(N, N);
 
     Eigen::VectorXd x(N);
-    vector<vector<double>> data = readCSV("../observation_data/observation_data.csv");
+    Eigen::MatrixXd data = readCSV("observation_data/observation_data.csv");
     for (int i = 0; i < N; i++)
     {
-        x[i] = data[0][i];
+        x[i] = data(0, i);
         file << x[i] << " ";
     }
     file << endl;
@@ -40,15 +35,15 @@ int main()
         x = lorenz96_rk4(N, 1, dt, F, x);
         if (i % 10 == 0)
         {
-            // for (int j = 0; j < N; j++)
-            // {
-            //     x_obs[j] = data[i / 10][j];
-            // }
-            // x_f = x;
-            // p_f = p;
-            // K_gain = p_f * H.transpose() * (H * p_f * H.transpose() + R).inverse();
-            // x = x_f + K_gain * (x_obs - H * x_f);
-            // p = (Eigen::MatrixXd::Identity(N, N) - K_gain * H) * p_f;
+            for (int j = 0; j < N; j++)
+            {
+                x_obs[j] = data(i / 10, j);
+            }
+            x_f = x;
+            p_f = p;
+            K_gain = p_f * H.transpose() * (H * p_f * H.transpose() + R).inverse();
+            x = x_f + K_gain * (x_obs - H * x_f);
+            p = (Eigen::MatrixXd::Identity(N, N) - K_gain * H) * p_f;
             for (int j = 0; j < N; j++)
             {
                 file << x[j] << " ";
