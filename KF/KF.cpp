@@ -5,6 +5,7 @@
 #include "lorenz96_rk4.h"
 #include "covariance.h"
 #include "constant.h"
+#include "jacobi.h"
 
 using namespace std;
 
@@ -31,7 +32,8 @@ int main()
 
     for (int i = 1; i < time_steps / 2; i++)
     {
-        p = covariance_matrix(p, x);
+        Eigen::MatrixXd jacobi_matrix = lorenz96_jacobi_matrix(x);
+        p = covariance_matrix(p, x, jacobi_matrix);
         x = lorenz96_rk4(N, 1, dt, F, x);
         if (i % 10 == 0)
         {
