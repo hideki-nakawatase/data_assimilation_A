@@ -1,16 +1,18 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
 df1 = pd.read_csv("observation_data/observation_data.csv", header=None, sep=" ")
 df2 = pd.read_csv("true_data/true_data.csv", header=None, sep=" ")
-df3 = pd.read_csv("KF_data/KF_data.csv", header=None, sep=" ")
-df4 = pd.read_csv("KF_data/no_KF_data.csv", header=None, sep=" ")
+df3 = pd.read_csv("3D_Variational_method_data/data.csv", header=None, sep=" ")
+#f4 = pd.read_csv("KF_data/no_KF_data.csv", header=None, sep=" ")
 
 y1 = df1.iloc[:1460, 19]
 y2 = df2.iloc[:1460, 19]
 y3 = df3.iloc[:1460, 19]
-y4 = df4.iloc[:1460, 19]
+#y4 = df4.iloc[:1460, 19]
 
 
 x1 = np.arange(0, 75, 0.25)
@@ -48,28 +50,27 @@ ax4.set_title("225~300days")
 
 fig.suptitle("x_20")
 fig.legend()
-fig.show()
-fig.savefig("KF_data/KF_data.png")
+fig.savefig("3D_Variational_method_data/time_step.jpg")
 
 
-fig2 = plt.figure(figsize=(14, 8))
-ax1 = fig2.subplots()
-ax1.plot(x1, y1[:300], label="observation")
-ax1.plot(x1, y2[:300], label="true")
-ax1.plot(x1, y3[:300], label="KF")
+# fig2 = plt.figure(figsize=(14, 8))
+# ax1 = fig2.subplots()
+# ax1.plot(x1, y1[:300], label="observation")
+# ax1.plot(x1, y2[:300], label="true")
+# ax1.plot(x1, y3[:300], label="KF")
 
-fig2.suptitle("x_20")
-fig2.legend()
-fig2.show()
-fig2.savefig("KF_data/KF_data_75days.png")
+# fig2.suptitle("x_20")
+# fig2.legend()
+# fig2.show()
+# fig2.savefig("KF_data/KF_data_75days.png")
 
-fig3 = plt.figure(figsize=(14, 8))
-ax = fig3.subplots()
-ax.plot(x5, y1[1200:1460], label="true")
-ax.plot(x5, y3[1200:1460], label="KF")
-ax.plot(x5, y4[1200:1460], label="no_KF")
+# fig3 = plt.figure(figsize=(14, 8))
+# ax = fig3.subplots()
+# ax.plot(x5, y1[1200:1460], label="true")
+# ax.plot(x5, y3[1200:1460], label="KF")
+# ax.plot(x5, y4[1200:1460], label="no_KF")
 
-fig3.suptitle("x_20")
-fig3.legend()
-fig3.show()
-fig3.savefig("KF_data/KF_data_last_65days_test.png")
+# fig3.suptitle("x_20")
+# fig3.legend()
+# fig3.show()
+# fig3.savefig("KF_data/KF_data_last_65days_test.png")

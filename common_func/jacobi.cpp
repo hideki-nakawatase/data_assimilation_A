@@ -2,6 +2,8 @@
 #include "lorenz96_rk4.h"
 #include <cmath>
 #include <Eigen/Dense>
+#include <lorenz96_rk4.h>
+#include <constant.h>
 
 using namespace std;
 
@@ -9,18 +11,16 @@ Eigen::MatrixXd lorenz96_jacobi_matrix(Eigen::VectorXd &x)
 {
   int N = 40;
   Eigen::MatrixXd jacobi_matrix(N, N);
+  Eigen::VectorXd y(N);
   jacobi_matrix.setZero();
+  Eigen::VectorXd x_next(N);
+  x_next = lorenz96_rk4(N, 1, dt, F, x);
 
   for (int i = 0; i < N; i++)
   {
-    int k = (i - 1 + N) % N;
-    int l = (i - 2 + N) % N;
-    int m = (i + 1) % N;
-
-    jacobi_matrix(i, i) = -1.0;
-    jacobi_matrix(i, k) = x[m] - x[l];
-    jacobi_matrix(i, l) = -x[k];
-    jacobi_matrix(i, m) = x[k];
+    y = x;
+    y(i) = x(i) + ϵ;
+    jacobi_matrix.col(i) = (lorenz96_rk4(N, 1, dt, F, y) - x_next) / ϵ;
   }
 
   return jacobi_matrix;
