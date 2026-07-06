@@ -9,7 +9,6 @@ using namespace std;
 
 Eigen::MatrixXd lorenz96_jacobi_matrix(Eigen::VectorXd &x)
 {
-  int N = 40;
   Eigen::MatrixXd jacobi_matrix(N, N);
   Eigen::VectorXd y(N);
   jacobi_matrix.setZero();
@@ -20,7 +19,11 @@ Eigen::MatrixXd lorenz96_jacobi_matrix(Eigen::VectorXd &x)
   {
     y = x;
     y(i) = x(i) + ϵ;
-    jacobi_matrix.col(i) = (lorenz96_rk4(N, 1, dt, F, y) - x_next) / ϵ;
+    y = lorenz96_rk4(N, 1, dt, F, y);
+    for (int j = 0; j < N; j++)
+    {
+      jacobi_matrix(j, i) = (y(j) - x_next(j)) / ϵ;
+    }
   }
 
   return jacobi_matrix;

@@ -6,9 +6,9 @@
 
 using namespace std;
 
-Eigen::MatrixXd covariance_matrix(Eigen::MatrixXd &p, Eigen::VectorXd &x, Eigen::MatrixXd &M)
+Eigen::MatrixXd covariance_matrix(Eigen::MatrixXd &p, Eigen::MatrixXd &M)
 {
-  Eigen::MatrixXd I = Eigen::MatrixXd::Identity(40, 40);
-  Eigen::MatrixXd p_next = delta * (I + 0.005 * M) * p * (I + 0.005 * M).transpose();
+  Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(N, N);
+  Eigen::MatrixXd p_next = M * p * M.transpose() + Q * 1e-4;
   return p_next;
 }

@@ -19,8 +19,6 @@ int main()
     if (!file)
         cout << "file not found" << endl;
 
-    Eigen::MatrixXd file_output(time_steps / 10, N);
-
     Eigen::MatrixXd p = Eigen::MatrixXd::Identity(N, N);
     Eigen::VectorXd x(N);
 
@@ -41,12 +39,9 @@ int main()
     double delta_base = 1.01;
     for (int step = 0; step <= N; step++)
     {
-        delta = delta_base;
         Eigen::VectorXi delete_vec(step);
 
         Eigen::MatrixXd H_backup = H;
-
-        delta = 1.0;
 
         for (int i = 0; i < N; i++)
         {
@@ -58,8 +53,10 @@ int main()
         for (int i = 1; i < time_steps / 2; i++)
         {
             Eigen::MatrixXd jacobi_matrix = lorenz96_jacobi_matrix(x);
-            p = covariance_matrix(p, x, jacobi_matrix);
+            p = covariance_matrix(p, jacobi_matrix);
+            p = 0.5 * (p + p.transpose());
             x = lorenz96_rk4(N, 1, dt, F, x);
+
             if (i % 10 == 0)
             {
                 H = Eigen::MatrixXd::Identity(N, N);
@@ -86,7 +83,7 @@ int main()
 
         if (isnan(result(step)) || result(step) > 1.5)
         {
-            if (delta_base > 5)
+            if (delta_base > 2.0)
             {
                 file << result(step) << " ";
                 delta_base = 1.01;

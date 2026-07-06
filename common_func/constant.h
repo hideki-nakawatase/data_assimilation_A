@@ -11,3 +11,5 @@ inline constexpr double F = 8;
 inline constexpr double delta = 1.05;
 inline constexpr double ϵ = 1e-5;
 inline constexpr double alpha = 0.27;
+
+#endif
