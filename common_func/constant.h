@@ -1,3 +1,5 @@
+#ifndef CONSTANT_H
+#define CONSTANT_H
 #pragma once
 
 inline constexpr int days = 730;
