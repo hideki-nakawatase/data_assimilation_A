@@ -8,11 +8,11 @@ using namespace std;
 
 int main()
 {
-    ofstream file("KF_data/KF_rms_delta.csv");
-    Eigen::MatrixXd kf_data = readCSV("KF_data/KF_data_delta.csv");
+    ofstream file("KF_data/no_KF_data_rms.csv");
+    Eigen::MatrixXd data = readCSV("KF_data/no_KF_data.csv");
     Eigen::MatrixXd true_data = readCSV("true_data/true_data.csv");
 
-    Eigen::VectorXd rms = rms_calc(kf_data, true_data);
+    Eigen::VectorXd rms = rms_calc(data, true_data);
 
     for (int i = 0; i < rms.rows(); i++)
     {

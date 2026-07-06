@@ -27,7 +27,7 @@ Eigen::VectorXd rms_calc(Eigen::MatrixXd &x_kf, Eigen::MatrixXd &x_true)
 double avg_rms(Eigen::VectorXd &rms_vec)
 {
     double avg = 0.0;
-    int spin_up_lim = 60 / 0.2 * 4;
+    int spin_up_lim = 60 / 0.2 * 4 / 10;
     for (int i = spin_up_lim; i < rms_vec.rows(); i++)
         avg += rms_vec[i];
     avg /= rms_vec.rows() - spin_up_lim;
