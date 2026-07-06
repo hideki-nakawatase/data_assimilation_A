@@ -1,42 +1,40 @@
-#include <vector>
-#include <Eigen/Dense>
-#include <random>
+#include <constant.h>
 #include <fstream>
-#include <cstdint>
-#include "read_csv.h"
-#include "lorenz96_rk4.h"
-#include "covariance.h"
-#include "constant.h"
-#include "jacobi.h"
+#include <Eigen/Dense>
+#include <read_csv.h>
+#include <lorenz96_rk4.h>
 #include <random.h>
+#include <jacobi.h>
+#include <covariance.h>
+#include <matrix_sqrt.h>
 #include <rms.h>
+#include <random>
 
 using namespace std;
 
 int main()
 {
-  ofstream file("EnKF_data/PO_data.csv");
+  ofstream file("EnKF_data/SRF_data.csv");
 
   random_device seed_gen;
   mt19937 gen(seed_gen());
 
   normal_distribution<double> dist_init(0.0, 1.0);
-  normal_distribution<double> dist_obs(0.0, 1.0);
+
+  Eigen::MatrixXd data = readCSV("observation_data/observation_data.csv");
+  Eigen::MatrixXd true_data = readCSV("true_data/true_data.csv");
 
   Eigen::MatrixXd x_mem(N, M);
   Eigen::VectorXd ensemble_avg(N);
-
-  Eigen::MatrixXd data = readCSV("observation_data/observation_data.csv");
-  Eigen::MatrixXd data_true = readCSV("true_data/true_data.csv");
-
-  Eigen::MatrixXd R = Eigen::MatrixXd::Identity(N, N);
-
   Eigen::VectorXd x_f(N);
-  Eigen::MatrixXd p(N, N);
+  Eigen::MatrixXd p_f(N, N);
   Eigen::MatrixXd K_gain(N, N);
+  Eigen::MatrixXd K_prime_gain(N, N);
   Eigen::VectorXd x_obs(N);
   Eigen::VectorXd obs_fluctuation(N);
   Eigen::MatrixXd H(N, N);
+  Eigen::MatrixXd R = Eigen::MatrixXd::Identity(N, N);
+  Eigen::MatrixXd I = Eigen::MatrixXd::Identity(N, N);
 
   Eigen::MatrixXd tmp(time_steps / 2 / 10, N);
   Eigen::VectorXd rms_vec(tmp.rows());
@@ -70,6 +68,15 @@ int main()
         x_mem.col(j) = lorenz96_rk4(1, x_f);
       }
 
+      ensemble_avg = x_mem.rowwise().mean();
+
+      p_f.setZero();
+      for (int i = 0; i < M; i++)
+      {
+        p_f += (x_mem.col(i) - ensemble_avg) * (x_mem.col(i) - ensemble_avg).transpose();
+      }
+      p_f /= M - 1;
+
       if (i % 10 == 0)
       {
         H = Eigen::MatrixXd::Identity(N, N);
@@ -80,53 +87,31 @@ int main()
           H(delete_int, delete_int) = 0.0;
         }
 
+        double inf_factor = sqrt(delta_base);
+        for (int j = 0; j < M; j++)
+        {
+          x_mem.col(j) = ensemble_avg + inf_factor * (x_mem.col(j) - ensemble_avg);
+        }
+
         x_obs = data.row(i / 10).transpose();
 
-        ensemble_avg = x_mem.rowwise().mean();
-        p.setZero();
-        for (int j = 0; j < M; j++)
-        {
-          p += (x_mem.col(j) - ensemble_avg) * (x_mem.col(j) - ensemble_avg).transpose();
-        }
-        p /= M - 1;
-        p *= delta_base;
-
-        K_gain = p * H.transpose() * (H * p * H.transpose() + R).inverse();
+        K_gain = p_f * H.transpose() * (H * p_f * H.transpose() + R).inverse();
+        K_prime_gain = K_gain * (I + matrix_sqrt(R * (H * p_f * H.transpose() + R).inverse())).inverse();
 
         for (int j = 0; j < M; j++)
         {
-          for (int k = 0; k < N; k++)
-          {
-            obs_fluctuation(k) = dist_obs(gen);
-          }
-          x_mem.col(j) += K_gain * (x_obs + obs_fluctuation - H * x_mem.col(j));
+          x_mem.col(j) = ensemble_avg + K_gain * (x_obs - H * ensemble_avg) + (I - K_prime_gain * H) * (x_mem.col(j) - ensemble_avg);
         }
         ensemble_avg = x_mem.rowwise().mean();
         tmp.row(i / 10) = ensemble_avg;
       }
     }
-    rms_vec = rms_calc(tmp, data_true);
+
+    rms_vec = rms_calc(tmp, true_data);
     result(step) = avg_rms(rms_vec);
 
-    if (isnan(result(step)) || result(step) > 1.0)
-    {
-      if (delta_base > 2.0)
-      {
-        file << result(step) << " ";
-        delta_base = delta;
-        cout << "step " << step << endl;
-        continue;
-      }
-      cout << result(step) << endl;
-      step -= 1;
-      delta_base += 0.1;
-      H = H_backup;
-      cout << "delta " << delta_base << endl;
-      continue;
-    }
-
     file << result(step) << " ";
-    delta_base = delta;
+
     cout << "step " << step << endl;
   }
   return 0;

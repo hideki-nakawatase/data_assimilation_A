@@ -9,6 +9,6 @@ using namespace std;
 Eigen::MatrixXd covariance_matrix(Eigen::MatrixXd &p, Eigen::MatrixXd &M)
 {
   Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(N, N);
-  Eigen::MatrixXd p_next = M * p * M.transpose() + Q * 1e-4;
+  Eigen::MatrixXd p_next = M * p * M.transpose();
   return p_next;
 }
