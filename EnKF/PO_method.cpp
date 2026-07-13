@@ -110,7 +110,7 @@ int main()
 
     if (isnan(result(step)) || result(step) > 1.0)
     {
-      if (delta_base > 2.0)
+      if (delta_base > 1.5)
       {
         file << result(step) << " ";
         delta_base = delta;

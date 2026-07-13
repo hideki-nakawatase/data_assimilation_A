@@ -55,7 +55,7 @@ int main()
             Eigen::MatrixXd jacobi_matrix = lorenz96_jacobi_matrix(x);
             p = covariance_matrix(p, jacobi_matrix);
             p = 0.5 * (p + p.transpose());
-            x = lorenz96_rk4(N, 1, dt, F, x);
+            x = lorenz96_rk4(1, x);
 
             if (i % 10 == 0)
             {
@@ -81,7 +81,7 @@ int main()
         rms_vec = rms_calc(tmp, data_true);
         result(step) = avg_rms(rms_vec);
 
-        if (isnan(result(step)) || result(step) > 1.5)
+        if (isnan(result(step)) || result(step) > 1.0)
         {
             if (delta_base > 2.0)
             {

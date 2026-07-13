@@ -87,11 +87,11 @@ int main()
           H(delete_int, delete_int) = 0.0;
         }
 
-        double inf_factor = sqrt(delta_base);
-        for (int j = 0; j < M; j++)
-        {
-          x_mem.col(j) = ensemble_avg + inf_factor * (x_mem.col(j) - ensemble_avg);
-        }
+        // double inf_factor = sqrt(delta_base);
+        // for (int j = 0; j < M; j++)
+        // {
+        //   x_mem.col(j) = ensemble_avg + inf_factor * (x_mem.col(j) - ensemble_avg);
+        // }
 
         x_obs = data.row(i / 10).transpose();
 
