@@ -9,12 +9,14 @@
 #include <matrix_sqrt.h>
 #include <rms.h>
 #include <random>
+#include <adaptive_inflation.h>
 
 using namespace std;
 
 int main()
 {
     ofstream file("EnKF_data/localized_transform_data.csv");
+    ofstream file2("EnKF_data/localized_transform_L.csv");
 
     random_device seed_gen;
     mt19937 gen(seed_gen());
@@ -27,7 +29,6 @@ int main()
     Eigen::MatrixXd x_mem(N, M);
     Eigen::VectorXd ensemble_avg(N);
     Eigen::VectorXd x_f(N);
-    Eigen::MatrixXd p_f(N, N);
     Eigen::MatrixXd K_gain(N, N);
     Eigen::MatrixXd K_prime_gain(N, N);
     Eigen::VectorXd x_obs(N);
@@ -42,7 +43,8 @@ int main()
 
     double delta_base = delta;
 
-    for (int m = 1; m <= 6; m++)
+    Eigen::MatrixXd result_tmp(11, N + 1);
+    for (int m = 0; m <= 10; m++)
     {
         for (int step = 0; step <= N; step++)
         {
@@ -72,13 +74,6 @@ int main()
                 }
 
                 ensemble_avg = x_mem.rowwise().mean();
-
-                p_f.setZero();
-                for (int i = 0; i < M; i++)
-                {
-                    p_f += (x_mem.col(i) - ensemble_avg) * (x_mem.col(i) - ensemble_avg).transpose();
-                }
-                p_f /= M - 1;
 
                 if (i % 10 == 0)
                 {
@@ -118,11 +113,17 @@ int main()
                     {
                         X_prime.col(j) = x_mem.col(j) - ensemble_avg;
                     }
+                    Eigen::MatrixXd p_f = (X_prime * X_prime.transpose()) / (M - 1);
+                    Eigen::VectorXd avg_tmp = H_new * ensemble_avg;
+
+                    double inflation = adaptive_inflation(y_new, avg_tmp, p_f, R_new, H_new);
+                    inflation = std::clamp(inflation, 1.0, 1.5);
+                    X_prime *= sqrt(inflation);
 
                     Eigen::VectorXd ensemble_avg_new(N);
                     Eigen::MatrixXd X_prime_analysis(N, M);
 
-                    double L = 4.0;
+                    double L = 1.0 + m * 0.5;
 
                     for (int g = 0; g < N; g++)
                     {
@@ -135,7 +136,7 @@ int main()
                             if (dist > N / 2)
                                 dist = N - dist;
 
-                            if (dist <= m * 0.5 * L)
+                            if (dist <= 2 * sqrt(10 / 3) * L)
                             {
                                 local_obs_indices.push_back(k);
                                 double rho_val = std::exp(-(dist * dist) / (2.0 * L * L));
@@ -188,12 +189,16 @@ int main()
             }
 
             rms_vec = rms_calc(tmp, true_data);
-            result(step) = avg_rms(rms_vec);
-
-            file << result(step) << " ";
+            result_tmp(step) = avg_rms(rms_vec);
         }
-        file << endl;
-        cout << "m " << m << endl;
     }
+    for (int i = 0; i < N + 1; i++)
+    {
+        Eigen::Index min_row;
+        file << result_tmp.col(i).minCoeff(&min_row) << " ";
+        file2 << min_row << " ";
+    }
+    file << endl;
+    file2 << endl;
     return 0;
 }

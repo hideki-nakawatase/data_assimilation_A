@@ -5,7 +5,15 @@
 
 Eigen::MatrixXd matrix_sqrt(const Eigen::MatrixXd &A)
 {
-  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(A);
+  if (!A.allFinite())
+  {
+    std::cerr << "【エラー】matrix_sqrt に NaN または Inf が渡されました！" << std::endl;
+    // 処理を安全に倒すため、サイズに合わせた単位行列を返してクラッシュを防ぐ
+    return Eigen::MatrixXd::Identity(A.rows(), A.cols());
+  }
+
+  Eigen::MatrixXd A_sym = 0.5 * (A + A.transpose());
+  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(A_sym);
 
   if (solver.info() != Eigen::Success)
   {

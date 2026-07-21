@@ -14,18 +14,18 @@ PO = df1.iloc[0, ::-1]
 x = np.arange(len(PO))
 # KF = df2.iloc[0, ::-1]
 # SRF = df3.iloc[0, ::-1]
-transform = df4.iloc[0, ::-1]
-localozed_transform = df.iloc[:, ::-1]
+# transform = df4.iloc[0, ::-1]
+localized_transform = df.iloc[:, ::-1]
 
 plt.figure(figsize=(12, 8))
 
-for i, row in localozed_transform.iterrows():
-    plt.plot(x, row, label=f"L={(i+1)*0.5*4.0}")
+for i,row in localized_transform.iterrows():
+    plt.plot(x,row,label=f'L={1.0+0.5*i}')
 
 # plt.plot(x, PO, color="orange", label="EnKF PO")
 # plt.plot(x, SRF, color="green", label="EnKF SRF")
 # plt.plot(x, KF, color="blue", label="KF")
-plt.plot(x, transform, color="red", label="ETKF")
+# plt.plot(x, transform, color="red", label="ETKF")
 plt.title("EnKF")
 plt.xlabel("observation data num")
 plt.ylabel("rms")

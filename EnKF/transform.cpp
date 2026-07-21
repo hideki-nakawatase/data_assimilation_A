@@ -9,6 +9,7 @@
 #include <matrix_sqrt.h>
 #include <rms.h>
 #include <random>
+#include <adaptive_inflation.h>
 
 using namespace std;
 
@@ -21,13 +22,14 @@ int main()
 
     normal_distribution<double> dist_init(0.0, 1.0);
 
+    bool step_failed = false;
+
     Eigen::MatrixXd data = readCSV("observation_data/observation_data.csv");
     Eigen::MatrixXd true_data = readCSV("true_data/true_data.csv");
 
     Eigen::MatrixXd x_mem(N, M);
     Eigen::VectorXd ensemble_avg(N);
     Eigen::VectorXd x_f(N);
-    Eigen::MatrixXd p_f(N, N);
     Eigen::MatrixXd K_gain(N, N);
     Eigen::MatrixXd K_prime_gain(N, N);
     Eigen::VectorXd x_obs(N);
@@ -77,13 +79,6 @@ int main()
             }
             X_prime *= sqrt(delta_base);
 
-            p_f.setZero();
-            for (int i = 0; i < M; i++)
-            {
-                p_f += X_prime.col(i) * X_prime.col(i).transpose();
-            }
-            p_f /= M - 1;
-
             if (i % 10 == 0)
             {
                 H = Eigen::MatrixXd::Identity(N, N);
@@ -123,12 +118,25 @@ int main()
                     X_prime.col(j) = x_mem.col(j) - ensemble_avg;
                 }
 
+                Eigen::MatrixXd p_f = (X_prime * X_prime.transpose()) / (M - 1);
+                Eigen::VectorXd avg_tmp = H_new * ensemble_avg;
+
+                double inflation = adaptive_inflation(y_new, avg_tmp, p_f, R_new, H_new);
+                inflation = std::clamp(inflation, 1.0, 1.5);
+                X_prime *= sqrt(inflation);
+
                 Eigen::MatrixXd Y_prime = H_new * X_prime;
 
                 Eigen::MatrixXd I_M = Eigen::MatrixXd::Identity(M, M);
                 Eigen::MatrixXd I_obs = Eigen::MatrixXd::Identity(keep.size(), keep.size());
 
                 Eigen::MatrixXd P_tilde = (I_M - Y_prime.transpose() * (Y_prime * Y_prime.transpose() + (M - 1) * I_obs).inverse() * Y_prime) / (M - 1);
+
+                // if (!P_tilde.allFinite())
+                // {
+                //     step_failed = true;
+                //     break;
+                // }
 
                 Eigen::VectorXd innovation = y_new - H_new * ensemble_avg;
                 Eigen::VectorXd w = P_tilde * Y_prime.transpose() * innovation;
@@ -146,6 +154,11 @@ int main()
                 tmp.row(i / 10) = ensemble_avg;
             }
         }
+        // if (step_failed)
+        // {
+        //     step -= 1;
+        //     continue;
+        // }
 
         rms_vec = rms_calc(tmp, true_data);
         result(step) = avg_rms(rms_vec);
